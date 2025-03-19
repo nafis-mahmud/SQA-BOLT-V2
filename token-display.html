@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SupplyChainHub - Token Display</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1, h2 {
+            color: #333;
+        }
+        .token-display {
+            background-color: #f5f5f5;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: monospace;
+            word-break: break-all;
+            margin: 15px 0;
+            position: relative;
+        }
+        .copy-btn {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .copy-btn:hover {
+            background-color: #45a049;
+        }
+        .status {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 4px;
+            display: none;
+        }
+        .success {
+            background-color: #dff0d8;
+            color: #3c763d;
+        }
+        .error {
+            background-color: #f2dede;
+            color: #a94442;
+        }
+        .warning {
+            background-color: #fcf8e3;
+            color: #8a6d3b;
+        }
+    </style>
+</head>
+<body>
+    <h1>SupplyChainHub Token Display</h1>
+    
+    <div class="card">
+        <h2>Your Authentication Token</h2>
+        <p>Copy this token to use in the SupplyChainHub Chrome extension:</p>
+        
+        <div id="token-display" class="token-display">
+            Checking for token...
+        </div>
+        
+        <button id="copy-token" class="copy-btn">Copy Token</button>
+        <div id="copy-status" class="status"></div>
+        
+        <div id="no-token-message" style="display: none;">
+            <p class="warning" style="display: block;">No authentication token found. Please log in to the application first.</p>
+            <a href="/" class="copy-btn" style="display: inline-block; text-decoration: none;">Go to Login</a>
+        </div>
+    </div>
+    
+    <div class="card">
+        <h2>How to Use This Token</h2>
+        <ol>
+            <li>Copy the token above using the "Copy Token" button</li>
+            <li>Open the SupplyChainHub Chrome extension</li>
+            <li>Paste the token into the token input field</li>
+            <li>Click "Submit Token"</li>
+        </ol>
+        <p>The extension will then be authenticated and able to access your projects.</p>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const tokenDisplay = document.getElementById('token-display');
+            const copyButton = document.getElementById('copy-token');
+            const copyStatus = document.getElementById('copy-status');
+            const noTokenMessage = document.getElementById('no-token-message');
+            
+            // Check for token in localStorage
+            const token = localStorage.getItem('authToken');
+            
+            if (token) {
+                // Display the token
+                tokenDisplay.textContent = token;
+            } else {
+                // No token found
+                tokenDisplay.style.display = 'none';
+                copyButton.style.display = 'none';
+                noTokenMessage.style.display = 'block';
+            }
+            
+            // Copy button functionality
+            copyButton.addEventListener('click', function() {
+                const token = tokenDisplay.textContent;
+                
+                navigator.clipboard.writeText(token)
+                    .then(() => {
+                        copyStatus.textContent = '✅ Token copied to clipboard!';
+                        copyStatus.className = 'status success';
+                        copyStatus.style.display = 'block';
+                        
+                        // Hide the success message after 3 seconds
+                        setTimeout(() => {
+                            copyStatus.style.display = 'none';
+                        }, 3000);
+                    })
+                    .catch(err => {
+                        copyStatus.textContent = '❌ Failed to copy token: ' + err;
+                        copyStatus.className = 'status error';
+                        copyStatus.style.display = 'block';
+                    });
+            });
+        });
+    </script>
+</body>
+</html>

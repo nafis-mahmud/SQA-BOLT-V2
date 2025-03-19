@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SupplyChainHub Extension Connector</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1, h2 {
+            color: #333;
+        }
+        code {
+            background-color: #f5f5f5;
+            padding: 2px 4px;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+        pre {
+            background-color: #f5f5f5;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .status {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .success {
+            background-color: #dff0d8;
+            color: #3c763d;
+        }
+        .error {
+            background-color: #f2dede;
+            color: #a94442;
+        }
+        .warning {
+            background-color: #fcf8e3;
+            color: #8a6d3b;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>SupplyChainHub Extension Connector</h1>
+    
+    <div class="card">
+        <h2>Extension Status</h2>
+        <p>This page helps connect your SupplyChainHub web application with the Chrome extension.</p>
+        <button id="checkExtension">Check Extension Status</button>
+        <div id="extensionStatus" class="status hidden"></div>
+    </div>
+    
+    <div class="card">
+        <h2>Token Transfer</h2>
+        <p>Use this section to test sending your authentication token to the extension.</p>
+        <div>
+            <label for="tokenInput">Authentication Token:</label><br>
+            <input type="text" id="tokenInput" style="width: 100%; padding: 8px; margin-top: 5px;" placeholder="Paste your authentication token here">
+        </div>
+        <br>
+        <button id="sendToken">Send Token to Extension</button>
+        <div id="tokenStatus" class="status hidden"></div>
+    </div>
+    
+    <div class="card">
+        <h2>Integration Instructions</h2>
+        <p>To integrate this functionality into your web application, follow these steps:</p>
+        <ol>
+            <li>Add the <code>extension-connector.js</code> script to your web application</li>
+            <li>Update the <code>EXTENSION_ID</code> in the script with your actual extension ID</li>
+            <li>Call the <code>sendTokenToExtension</code> function after successful login</li>
+        </ol>
+        
+        <h3>Example Code:</h3>
+        <pre>
+// After user logs in and you receive the token
+function onLoginSuccess(token) {
+    // First save the token for your web app
+    localStorage.setItem('authToken', token);
+    
+    // Then send it to the extension if installed
+    if (typeof sendTokenToExtension === 'function') {
+        sendTokenToExtension(token)
+            .then(response => {
+                console.log("Extension authenticated successfully");
+            })
+            .catch(error => {
+                console.error("Failed to authenticate extension:", error);
+            });
+    }
+}
+        </pre>
+    </div>
+
+    <script src="extension-connector.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const checkExtensionBtn = document.getElementById('checkExtension');
+            const sendTokenBtn = document.getElementById('sendToken');
+            const extensionStatusDiv = document.getElementById('extensionStatus');
+            const tokenStatusDiv = document.getElementById('tokenStatus');
+            const tokenInput = document.getElementById('tokenInput');
+            
+            // Try to auto-fill token from localStorage if available
+            const savedToken = localStorage.getItem('authToken');
+            if (savedToken) {
+                tokenInput.value = savedToken;
+            }
+            
+            // Check extension button
+            checkExtensionBtn.addEventListener('click', function() {
+                extensionStatusDiv.classList.remove('hidden', 'success', 'error', 'warning');
+                extensionStatusDiv.textContent = 'Checking extension status...';
+                
+                isExtensionInstalled()
+                    .then(installed => {
+                        if (installed) {
+                            extensionStatusDiv.textContent = '✅ Extension is installed and accessible!';
+                            extensionStatusDiv.classList.add('success');
+                        } else {
+                            extensionStatusDiv.textContent = '❌ Extension is not installed or not accessible. Make sure you have installed the SupplyChainHub extension and that you\'ve updated the EXTENSION_ID in the script.';
+                            extensionStatusDiv.classList.add('error');
+                        }
+                    })
+                    .catch(error => {
+                        extensionStatusDiv.textContent = '❌ Error checking extension status: ' + error.message;
+                        extensionStatusDiv.classList.add('error');
+                    });
+            });
+            
+            // Send token button
+            sendTokenBtn.addEventListener('click', function() {
+                const token = tokenInput.value.trim();
+                
+                tokenStatusDiv.classList.remove('hidden', 'success', 'error', 'warning');
+                
+                if (!token) {
+                    tokenStatusDiv.textContent = '⚠️ Please enter a token first';
+                    tokenStatusDiv.classList.add('warning');
+                    return;
+                }
+                
+                tokenStatusDiv.textContent = 'Sending token to extension...';
+                
+                // Save token to localStorage
+                localStorage.setItem('authToken', token);
+                
+                sendTokenToExtension(token)
+                    .then(response => {
+                        tokenStatusDiv.textContent = '✅ Token successfully sent to extension!';
+                        tokenStatusDiv.classList.add('success');
+                    })
+                    .catch(error => {
+                        tokenStatusDiv.textContent = '❌ Failed to send token to extension: ' + error.message;
+                        tokenStatusDiv.classList.add('error');
+                    });
+            });
+        });
+    </script>
+</body>
+</html>

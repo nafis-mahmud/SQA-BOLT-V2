@@ -1,0 +1,28 @@
+{
+  "manifest_version": 3,
+  "name": "SupplyChainHub Extension",
+  "version": "1.0.0",
+  "description": "SupplyChainHub browser extension with license management and recording functionality",
+  "permissions": [
+    "storage",
+    "tabs",
+    "webNavigation",
+    "alarms",
+    "activeTab"
+  ],
+  "host_permissions": [
+    "https://*.supplychainhub.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://*.supplychainhub.com/*", "<all_urls>"],
+      "js": ["contentScript.js"]
+    }
+  ]
+}
